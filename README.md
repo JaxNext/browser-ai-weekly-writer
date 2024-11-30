@@ -1,1 +1,3 @@
-# A initial project using: Vite + Vue 3 + shadcn-vue
+# A Web App for Writing Weekly Reports
+
+> Using Chrome built-in AI, as well as Vue 3, Vite, Tailwind CSS, Shadcn UI, and TypeScript.
