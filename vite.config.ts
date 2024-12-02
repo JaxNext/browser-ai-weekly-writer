@@ -21,7 +21,7 @@ export default defineConfig({
     },
   },
   build: {
-    outDir: 'dist',
+    outDir: 'weekly-writer',
     rollupOptions: {
       output: {
         sanitizeFileName(name) {

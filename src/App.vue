@@ -6,7 +6,6 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
@@ -17,37 +16,77 @@ import {
   TagsInputItemDelete,
   TagsInputItemText,
 } from '@/components/ui/tags-input'
-import {
-  useClipboard,
-  useStorage,
-} from '@vueuse/core'
+import { useClipboard } from '@vueuse/core'
 import { Button } from '@/components/ui/button'
 import { marked } from 'marked'
-const isSupport = ref(false)
-const isLoading = ref(false)
-const writer = ref<any>(null)
-const output = ref<string>('')
-const parsedOutput = ref<string>('')
 
+// Define interfaces for our maps
+interface ToneMap {
+  [key: string]: string;
+  formal: string;
+  neutral: string;
+  casual: string;
+}
 
-const { copy } = useClipboard()
+interface LengthMap {
+  [key: string]: string;
+  short: string;
+  medium: string;
+  long: string;
+}
 
-const toneMap = {
+interface FormatMap {
+  [key: string]: string;
+  'plain-text': string;
+  markdown: string;
+}
+
+// Define the maps with proper typing
+const toneMap: ToneMap = {
   formal: '正式',
   neutral: '中性',
   casual: '随意',
 }
-const lengthMap = {
+
+const lengthMap: LengthMap = {
   short: '短',
   medium: '中',
   long: '长',
 }
-const formatMap = {
+
+const formatMap: FormatMap = {
   'plain-text': '纯文本',
   markdown: 'Markdown',
 }
 
-const config = ref({
+// Define config type before using it
+interface WriterConfig {
+  sharedContext: string;
+  tone: string;
+  length: string;
+  format: string;
+}
+
+// Update AI interface to use WriterConfig
+interface AI {
+  writer?: {
+    create?: (config: WriterConfig) => Promise<any>;
+  };
+}
+
+// Declare the ai variable
+declare const ai: AI;
+
+const isSupport = ref(false)
+const isLoading = ref(false)
+const writer = ref<any>(null)
+const output = ref<string>('')
+const parsedOutput = ref('')
+
+
+const { copy } = useClipboard()
+
+const config = ref<WriterConfig>({
   sharedContext: '根据用户输入的关键词，写一篇工作周报，包含具体工作事项、总结、下周计划三个部分。',
   tone: 'formal',
   length: 'medium',
@@ -77,8 +116,9 @@ async function generate() {
   })
   for await (const chunk of stream) {
     output.value = chunk
-    parsedOutput.value = marked.parse(chunk)
-
+    if (typeof chunk === 'string') {
+      parsedOutput.value = await marked.parse(chunk)
+    }
   }
 }
 
